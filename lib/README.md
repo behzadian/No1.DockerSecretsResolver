@@ -1,4 +1,4 @@
-# No1.DockerSecretsUpdater
+# No1.DockerSecretsResolver
 
 Reads all settings and place that value of docker secrets in the configurations.
 
