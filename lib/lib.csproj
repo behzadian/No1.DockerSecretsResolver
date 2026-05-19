@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageOutputPath>$(NUGET_HOME)</PackageOutputPath>
+		<IsPackable>true</IsPackable>
+		<AssemblyName>No1.DockerSecretsResolver</AssemblyName>
+		<RootNamespace>No1.DockerSecretsResolver</RootNamespace>
+		<PackageId>No1.DockerSecretsResolver</PackageId>
+		<Authors>Hank Ben</Authors>
+		<Company>No1</Company>
+		<Product>No1.DockerSecretsResolver</Product>
+		<Version>1.0.0.0</Version>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+	<PropertyGroup>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2">
+			<TreatAsUsed>true</TreatAsUsed>
+		</PackageReference>
+	</ItemGroup>
+
+	<!-- Git hooks: skip in CI/Docker (no .git / not wanted in images). Local dev: run restore from repo root so dotnet-tools.json is found. -->
+	<Target Name="InstallHusky" AfterTargets="Restore" Condition="'$(HUSKY)' != '0' AND '$(CI)' != 'true'">
+		<Exec Command="dotnet tool restore" StandardOutputImportance="Low" />
+		<Exec Command="dotnet husky install" StandardOutputImportance="Low" />
+	</Target>
+</Project>

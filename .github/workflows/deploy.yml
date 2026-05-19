@@ -1,0 +1,51 @@
+name: Deploy NuGet Package
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+    - uses: actions/delete-package-versions@v5
+      with:
+        package-name: '${{ github.event.repository.name }}'
+        package-type: 'nuget'
+        num-old-versions-to-delete: 100
+        ignore-versions: 'initial'
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+      continue-on-error: true
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Check code style
+      run: dotnet format --verify-no-changes --verbosity diagnostic --severity error
+
+    - name: Build
+      run: dotnet build -c Release --no-restore
+
+    - name: Test
+      run: dotnet test
+
+    - name: Pack
+      run: dotnet pack -c Release --no-build --output ./artifacts
+
+    - name: Publish to GitHub Packages
+      run: |
+        dotnet nuget push ./artifacts/*.nupkg \
+          --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+          --api-key ${{ secrets.GITHUB_TOKEN }} \
+  # --skip-duplicate

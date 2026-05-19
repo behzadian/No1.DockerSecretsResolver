@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  push:
+    branches-ignore: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+      env:
+        HUSKY: 0
+
+    - name: Check code style
+      run: dotnet format --verify-no-changes --verbosity diagnostic --severity error
+
+    - name: Build
+      run: dotnet build -c Release --no-restore
+
+    - name: Test
+      run: dotnet test
