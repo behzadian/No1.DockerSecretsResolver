@@ -1,0 +1,9 @@
+# version: 260516
+.*/
+.env
+\!*/
+bin/
+obj/
+!.github/
+!.husky/
+*.lscache
