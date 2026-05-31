@@ -12,19 +12,20 @@ jobs:
       contents: read
 
     steps:
-    - uses: actions/delete-package-versions@v5
-      with:
-        package-name: '${{ github.event.repository.name }}'
-        package-type: 'nuget'
-        num-old-versions-to-delete: 100
-        ignore-versions: 'initial'
-        token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v5
 
+    - name: Delete published version (if any)
       continue-on-error: true
-    - uses: actions/checkout@v3
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        V=$(grep -oP '(?<=<Version>)[^<]+' lib/lib.csproj|head -1); O=${{ github.repository_owner }}; P=${{ github.event.repository.name }}
+        J=$(gh api "/users/$O/packages/nuget/$P/versions" --paginate 2>/dev/null || gh api "/orgs/$O/packages/nuget/$P/versions" --paginate 2>/dev/null || echo "[]")
+        ID=$(echo "$J"|jq -r --arg v "$V" --arg n "${V%.0}" '.[]|select(.name==$v or .name==$n)|.id'|head -1)
+        [ -n "$ID" ] && { gh api -X DELETE "/users/$O/packages/nuget/$P/versions/$ID" || gh api -X DELETE "/orgs/$O/packages/nuget/$P/versions/$ID"; } || true
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '10.0.x'
 
@@ -47,5 +48,4 @@ jobs:
       run: |
         dotnet nuget push ./artifacts/*.nupkg \
           --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-          --api-key ${{ secrets.GITHUB_TOKEN }} \
-  # --skip-duplicate
+          --api-key ${{ secrets.GITHUB_TOKEN }}

@@ -10,7 +10,7 @@
 		<AssemblyName>No1.DockerSecretsResolver</AssemblyName>
 		<RootNamespace>No1.DockerSecretsResolver</RootNamespace>
 		<PackageId>No1.DockerSecretsResolver</PackageId>
-		<Authors>Hank Ben</Authors>
+		<Authors>Hank Benz</Authors>
 		<Company>No1</Company>
 		<Product>No1.DockerSecretsResolver</Product>
 		<Version>1.0.1.1</Version>
